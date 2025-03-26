@@ -2,10 +2,13 @@
 <font size=4 color=black>用于爬取Bilibili（B站）视频评论的爬虫，支持爬取一级评论及二级回复，并将数据导出为CSV文件。通过输入视频的BV号，脚本会自动获取视频信息并抓取相关评论，包含用户基本信息、评论内容、IP属地、头像、会员、等级等字段。🦄🦄
 
 **🐨Github项目地址**：[bilibili-comment-crawler](https://github.com/1dyer/bilibili-comment-crawler)
-**🐒CSDN项目地址**：[利用Request通过bv号爬取B站指定视频下所有评论（IP地址、大会员、等级、一二级评论等等)，附带源码和教程](https://blog.csdn.net/onedyer/article/details/146535940?spm=1011.2124.3001.6209)
-**🐼博客教程地址**：[B站评论爬取(IP地址、内容、大会员、性别等等)教程 ](https://blog.ldyer.top/2025/03/26/B%E7%AB%99%E8%AF%84%E8%AE%BA%E7%88%AC%E5%8F%96/)
-</font>
 
+**🐒CSDN项目地址**：[利用Request通过bv号爬取B站指定视频下所有评论（IP地址、大会员、等级、一二级评论等等)，附带源码和教程](https://blog.csdn.net/onedyer/article/details/146535940?spm=1011.2124.3001.6209)
+
+**🐼博客教程地址**：[B站评论爬取(IP地址、内容、大会员、性别等等)教程 ](https://blog.ldyer.top/2025/03/26/B%E7%AB%99%E8%AF%84%E8%AE%BA%E7%88%AC%E5%8F%96/)
+
+</font>
+***
 # 1.数据样例🤪
 ![alt text](image/image-1.png)
 ![alt text](image/image.png)
