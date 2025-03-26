@@ -1,17 +1,24 @@
-# 通过BV号爬取B站指定视频下所有评论
-## 1.数据样例
+# 前言🐈
+<font size=4 color=black>用于爬取Bilibili（B站）视频评论的爬虫，支持爬取一级评论及二级回复，并将数据导出为CSV文件。通过输入视频的BV号，脚本会自动获取视频信息并抓取相关评论，包含用户基本信息、评论内容、IP属地、头像、会员、等级等字段。🦄🦄
+
+**🐨Github项目地址**：[bilibili-comment-crawler](https://github.com/1dyer/bilibili-comment-crawler)
+**🐒CSDN项目地址**：[利用Request通过bv号爬取B站指定视频下所有评论（IP地址、大会员、等级、一二级评论等等)，附带源码和教程](https://blog.csdn.net/onedyer/article/details/146535940?spm=1011.2124.3001.6209)
+**🐼博客教程地址**：[B站评论爬取(IP地址、内容、大会员、性别等等)教程 ](https://blog.ldyer.top/2025/03/26/B%E7%AB%99%E8%AF%84%E8%AE%BA%E7%88%AC%E5%8F%96/)
+</font>
+
+# 1.数据样例🤪
 ![alt text](image/image-1.png)
 ![alt text](image/image.png)
 ***
-## 2.功能特性
+# 2.功能特性
 - **​多级评论爬取**：支持爬取一级评论及二级回复。
 - **​用户信息采集**：包括用户ID、用户名、等级、性别、IP属地、大会员状态等。
 - **​自动分页处理**：自动遍历所有评论页，无需手动分页。
 - **​反爬机制处理**：使用时间戳和MD5加密生成请求参数，降低被封禁风险。
 - **​数据导出**：结果保存为CSV文件，兼容Excel和数据分析工具。
 ***
-## 3.快速开始
-### 步骤1：配置Cookie
+# 3.快速开始
+## 步骤1：配置Cookie
 登录`B站`，然后按`F12`打开`开发者模式`,点击`网络`，在搜索框中搜索`Cookie`，就可以在下方的显示栏选中`Cookie`，在项目根目录创建`bili_cookie.txt`文件，将`Cookie`粘贴进去.
 
 ![alt text](image/image-2.png)
@@ -28,12 +35,12 @@ def get_Header():
     }
     return header
 ```
-### 步骤2：运行脚本
+## 步骤2：运行脚本
 
 - 1.修改脚本中的目标视频BV号（代码末尾的 bv = `"BV1hMo4YrEW4"`）。
 - 2.执行脚本
 ***
-### 参数说明
+## 参数说明
 ​**is_second**​（默认开启）
 设为True时爬取二级评论，False仅爬取一级评论。
 
@@ -41,8 +48,8 @@ def get_Header():
 修改get_Header()中的User-Agent以模拟不同浏览器环境。
 ***
 
-## 4. 核心原理
-### 4.1 网络标头分析
+# 4. 核心原理
+## 4.1 网络标头分析
 通过抓包测试，B站网页端的评论获取是通过`请求URL`获取JSON格式的评论数据，在前端上解析出来。因此可以通过直接模拟网页截取JSON评论数据，来实现评论数据的爬取。
 
 ![alt text](image/image-3.png)
@@ -68,7 +75,7 @@ def get_Header():
 - `w_rid`
 - `wts`
 ***
-### 4.2 oid的获取
+## 4.2 oid的获取
 不同视频都有其对应的`oid`值，通过函数获取该值，这样就能获得视频的`oid`和`标题`。
 
 ```python
@@ -84,7 +91,7 @@ def get_information(bv):
     return oid, title
 ```
 ***
-### 4.3 type、plat、mode以及seek_rpid
+## 4.3 type、plat、mode以及seek_rpid
 `type`、`plat`和`mdoe`都是常量，分别为`1`、`1`和`2`。同时`seek_rpid`的值也默认为空
 ```python
     # 参数
@@ -93,20 +100,20 @@ def get_information(bv):
     type = 1
     seek_rpid=''
 ```
-### 4.4 web_location 
+## 4.4 web_location 
 `web_location`的值也默认是`1315875`，如果不放心或者报错，则可以按照上述方法查看自己的`web_location`值
 ```python
 web_location = 1315875
 ```
 ***
-### 4.5 wts的获取
+## 4.5 wts的获取
 从名字就可以看出来`wts`是当下的时间戳，对于这个，可以调用`time`，获取现在的时间戳。
 ```python
     # 获取当下时间戳
     wts = time.time()
 ```
 ***
-### 4.6 pagination_str 的提取
+## 4.6 pagination_str 的提取
 通过上图中的信息，可以发现`pagination_str`值在第一页时，默认值为`{"offset":""}`而后续页数都不同，其中从第二页，评论页的`\"cursor\"`值开始不同，为了寻找该值变化的规律，搜索不同数值，即`8722`的位置。
 
 ![alt text](image/image-8.png)
@@ -137,7 +144,7 @@ web_location = 1315875
         print(f"当前爬取{count}条。")
         start(bv, oid, next_pageID, count, csv_writer,is_second)
 ```
-### 4.7 w_rid与MD5加密算法
+## 4.7 w_rid与MD5加密算法
 `w_rid`的获取最为复杂，首先需要获取它的位置
 
 ![alt text](image/image-10.png)
@@ -168,7 +175,7 @@ web_location = 1315875
     MD5.update(code.encode('utf-8'))
     w_rid = MD5.hexdigest()
 ```
-## 5.完整代码
+# 5.完整代码
 ```python
 import re
 import requests
