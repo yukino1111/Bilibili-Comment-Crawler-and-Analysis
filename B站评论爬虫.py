@@ -63,6 +63,10 @@ def start(bv, oid, pageID, count, csv_writer, is_second):
     for reply in comment['data']['replies']:
         # 评论数量+1
         count += 1
+
+        if count % 1000 ==0:
+            time.sleep(20)
+
         # 上级评论ID
         parent=reply["parent"]
         # 评论ID
@@ -170,16 +174,16 @@ def start(bv, oid, pageID, count, csv_writer, is_second):
     # 判断是否是最后一页了
     if next_pageID == 0:
         print(f"评论爬取完成！总共爬取{count}条。")
-        return
+        return bv, oid, next_pageID, count, csv_writer,is_second
     # 如果不是最后一页，则停0.5s（避免反爬机制）
     else:
         time.sleep(0.5)
         print(f"当前爬取{count}条。")
-        start(bv, oid, next_pageID, count, csv_writer,is_second)
+        return bv, oid, next_pageID, count, csv_writer,is_second
 
 if __name__ == "__main__":
     # 获取视频bv
-    bv = "BV1hMo4YrEW4"
+    bv = "BV1GJ411x7h7"
     # 获取视频oid和标题
     oid,title = get_information(bv)
     # 评论起始页（默认为空）
@@ -198,4 +202,5 @@ if __name__ == "__main__":
         csv_writer.writerow(['序号', '上级评论ID','评论ID', '用户ID', '用户名', '用户等级', '性别', '评论内容', '评论时间', '回复数', '点赞数', '个性签名', 'IP属地', '是否是大会员', '头像'])
 
         # 开始爬取
-        start(bv, oid, next_pageID, count, csv_writer,is_second)
+        while next_pageID != 0:
+            bv, oid, next_pageID, count, csv_writer,is_second=start(bv, oid, next_pageID, count, csv_writer,is_second)
