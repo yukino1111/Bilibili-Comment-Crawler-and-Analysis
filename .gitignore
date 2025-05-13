@@ -5,3 +5,4 @@ __pycache__/
 *.csv
 bili_cookie.txt
 *.png
+./assets/chrome_user_data
