@@ -11,9 +11,6 @@ class CommentAnalyzer:
     def __init__(
         self,
         csv_path,
-        font_path,
-        stopwords_path="./assets/hit_stopwords.txt",
-        output_dir="image",
     ):
         """
         初始化评论分析器。
@@ -25,9 +22,9 @@ class CommentAnalyzer:
             output_dir (str): 保存图片的文件夹路径。
         """
         self.csv_path = csv_path
-        self.font_path = font_path
-        self.stopwords_path = stopwords_path
-        self.output_dir = output_dir
+        self.font_path = "./assets/fonts/PingFang-Medium.ttf"
+        self.stopwords_path = "./assets/hit_stopwords.txt"
+        self.output_dir = "./image"
         self.df = None  # 存储原始评论数据
         self.df_unique_users = None  # 存储按用户ID去重后的数据
         self._setup_matplotlib_font()  # 设置matplotlib字体
@@ -294,8 +291,5 @@ if __name__ == "__main__":
     # 请将这些路径替换为你实际的文件路径
     csv_file = "./assets/在百万豪装录音棚大声听陈_评论.csv"
     # 确保这个路径正确，可以使用绝对路径
-    font_file = "./assets/fonts/PingFang-Medium.ttf"
-    stopwords_file = "./assets/hit_stopwords.txt"
-
-    analyzer = CommentAnalyzer(csv_file, font_file, stopwords_path=stopwords_file)
+    analyzer = CommentAnalyzer(csv_file)
     analyzer.run_all_analysis()
