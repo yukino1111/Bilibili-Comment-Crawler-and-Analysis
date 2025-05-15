@@ -8,7 +8,7 @@ import glob
 
 if __name__ == "__main__":
     print("请选择获取评论模式：")
-    print("0: 获取单个视频评论")
+    print("0: 获取视频评论（多个BV号用逗号间隔）")
     print("1: 获取单个up主视频评论")
     get_mode = int(input("请输入模式（0/1）："))
     single_pos = ""
@@ -23,17 +23,35 @@ if __name__ == "__main__":
 
     if get_mode == 0:
         print("请输入视频BV号：")
-        bv = input()
-        print("是否开启二级评论爬取（默认开启）：")
+        bv_input = input()
+        print("是否开启二级评论爬取：")
         print("0: 否")
         print("1: 是")
         is_second = int(input())
+        bv_list = [bv.strip() for bv in bv_input.split(",") if bv.strip()]
+        successfully_crawled_bvs = []
+        for i, bv in enumerate(bv_list):
+            try:
+                print(f"正在爬取第 {i+1}/{len(bv_list)} 个BV号：{bv}")
+                crawler_success = BilibiliCommentCrawler(bv, is_second).crawl()
+                if crawler_success:
+                    successfully_crawled_bvs.append(bv)
+            except Exception as e:
+                print(f"爬取BV号 {bv} 时出错: {e}")
+        if not successfully_crawled_bvs:
+            print("所有BV号的评论爬取都失败了，请检查BV号或稍后再试。")
+        first_bv = successfully_crawled_bvs[0]
+        merged_filename_base = f"{first_bv}" # 文件名基础，加上“等”字
+        if(len(successfully_crawled_bvs) > 1):
+            merged_filename_base += "等"
+
         if is_second == 0:
             is_second = False
         else:
             is_second = True
-        crawler = BilibiliCommentCrawler(bv=bv, is_second=is_second).crawl()
-        single_pos = crawler[1]
+        single_pos = comment_merger.CommentMerger().merge_comments(
+            successfully_crawled_bvs, merged_filename_base
+        )  # 可以指定输出目录
         print(single_pos)
 
     elif get_mode == 1:

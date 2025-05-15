@@ -248,12 +248,6 @@ class BilibiliCommentCrawler:
             return True  # 表示继续爬取
 
     def crawl(self, bv=None, output_file=None):
-        """
-        开始爬取评论
-        :param bv: 视频的BV号，如果不提供则使用初始化时的BV号
-        :param output_file: 输出文件名，如果不提供则使用视频标题+BV号
-        :return: 爬取的评论数量
-        """
         if bv:
             self.bv = bv
 
@@ -309,6 +303,6 @@ if __name__ == "__main__":
 
     # 也可以在创建实例时指定BV号
     # crawler = BilibiliCommentCrawler(bv="BV1njEczKEYg", is_second=True)
-    crawler = BilibiliCommentCrawler(bv="BV1pz411v7zW", is_second=True)
+    crawler = BilibiliCommentCrawler(bv="BV15f4y1p7Gq", is_second=True)
 
     crawler.crawl()
