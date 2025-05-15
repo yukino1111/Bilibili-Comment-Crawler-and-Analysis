@@ -87,9 +87,11 @@ class BilibiliCommentCrawler:
             "utf-8"
         )
         comment = json.loads(comment)
-
+        if comment["data"]["cursor"]["mode"]==3:
+            return False
         for reply in comment["data"]["replies"]:
             # 评论数量+1
+            # print(reply)
             self.count += 1
 
             if self.count % 1000 == 0:
@@ -307,6 +309,6 @@ if __name__ == "__main__":
 
     # 也可以在创建实例时指定BV号
     # crawler = BilibiliCommentCrawler(bv="BV1njEczKEYg", is_second=True)
-    crawler = BilibiliCommentCrawler(bv="BV1tiEJzNEiy", is_second=True)
+    crawler = BilibiliCommentCrawler(bv="BV1pz411v7zW", is_second=True)
 
     crawler.crawl()
