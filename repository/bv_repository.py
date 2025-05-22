@@ -16,7 +16,7 @@ class BvRepository:
         try:
             insert_or_replace_sql = """
             INSERT OR REPLACE INTO bv (
-                oid, bv, title
+                oid, bid, title
             ) VALUES (?, ?, ?)
             """
             cursor.execute(insert_or_replace_sql, bv.to_tuple())
@@ -29,31 +29,7 @@ class BvRepository:
         finally:
             conn.close()
 
-    def add_or_update_bvs_batch(self, bvs: List[Bv]) -> int:
-        if not bvs:
-            return 0
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        count = 0
-        try:
-            insert_or_replace_sql = """
-            INSERT OR REPLACE INTO bv (
-                oid, bv, title
-            ) VALUES (?, ?, ?)
-            """
-            data_to_insert = [bv.to_tuple() for bv in bvs]
-            cursor.executemany(insert_or_replace_sql, data_to_insert)
-            count = cursor.rowcount
-            conn.commit()
-            return count
-        except sqlite3.Error as e:
-            conn.rollback()
-            print(f"批量添加/更新失败: {e}")
-            return 0
-        finally:
-            conn.close()
-
-    def delete_bvs_by_oid(self, oids: List[int]) -> int:
+    def delete_bvs_by_oids(self, oids: List[int]) -> int:
         if not oids:
             return 0
         conn = self._get_connection()
@@ -72,7 +48,7 @@ class BvRepository:
         finally:
             conn.close()
 
-    def get_bvs_by_oid(self, oids: List[int]) -> List[Bv]:
+    def get_information_by_oids(self, oids: List[int]) -> List[Bv]:
         if not oids:
             return []
         conn = self._get_connection()
@@ -90,16 +66,56 @@ class BvRepository:
             conn.close()
         return bvs
 
-    def get_bv_by_oid(self, oid: int) -> Optional[Bv]:
+    def get_information_by_bids(self, bids: List[str]) -> List[Bv]:
+        if not bids:
+            return []
         conn = self._get_connection()
         cursor = conn.cursor()
-        bv = None
+        bvs = []
         try:
-            cursor.execute("SELECT * FROM bv WHERE oid = ?", (oid,))
-            row = cursor.fetchone()
-            bv = Bv.from_db_row(row)
+            placeholders = ",".join(["?"] * len(bids))
+            query_sql = f"SELECT * FROM bv WHERE bid IN ({placeholders})"
+            cursor.execute(query_sql, tuple(bids))
+            for row in cursor.fetchall():
+                bvs.append(Bv.from_db_row(row))
         except sqlite3.Error as e:
             print(f"查询失败: {e}")
         finally:
             conn.close()
-        return bv
+        return bvs
+
+    def get_oids_by_bids(self, bids: List[str]) -> List[int]:
+        if not bids:
+            return []
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        oids = []
+        try:
+            placeholders = ",".join(["?"] * len(bids))
+            query_sql = f"SELECT oid FROM bv WHERE bid IN ({placeholders})"
+            cursor.execute(query_sql, tuple(bids))
+            for row in cursor.fetchall():
+                oids.append(row[0])
+        except sqlite3.Error as e:
+            print(f"查询失败: {e}")
+        finally:
+            conn.close()
+        return oids
+
+    def get_bids_by_oids(self, oids: List[int]) -> List[str]:
+        if not oids:
+            return []
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        bids = []
+        try:
+            placeholders = ",".join(["?"] * len(oids))
+            query_sql = f"SELECT bid FROM bv WHERE oid IN ({placeholders})"
+            cursor.execute(query_sql, tuple(oids))
+            for row in cursor.fetchall():
+                bids.append(row[1])
+        except sqlite3.Error as e:
+            print(f"查询失败: {e}")
+        finally:
+            conn.close()
+        return bids

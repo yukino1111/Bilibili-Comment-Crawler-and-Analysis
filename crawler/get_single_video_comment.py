@@ -6,6 +6,7 @@ import hashlib
 import urllib
 import time
 import datetime  # 替换 pandas.to_datetime
+from entity.bv import Bv
 from entity.comment import Comment
 from entity.user import User
 from repository.comment_repository import CommentRepository
@@ -33,6 +34,7 @@ class BilibiliCommentCrawler:
         # 数据库 Repository 实例
         self.comment_repo = CommentRepository(db_name)
         self.user_repo = UserRepository(db_name)
+        self.bv_repo = BvRepository(db_name)
 
     # 获取B站的Header
     def get_Header(self) -> dict:
@@ -86,6 +88,12 @@ class BilibiliCommentCrawler:
             )
 
         print(f"获取视频信息成功：OID={self.oid}, Title='{self.title}'")
+        bv_obj = Bv(
+            oid=self.oid,
+            bid=self.bv,
+            title=self.title,
+        )
+        self.bv_repo.add_or_update_bv(bv_obj)
         return self.oid, self.title
 
     def _parse_and_save_comment(

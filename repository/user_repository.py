@@ -42,36 +42,7 @@ class UserRepository:
         finally:
             conn.close()
 
-    def add_or_update_users_batch(self, users: List[User]) -> int:
-        """
-        批量添加或更新用户。
-        返回实际操作（插入或更新）的用户数量。
-        """
-        if not users:
-            return 0
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        count = 0
-        try:
-            insert_or_replace_sql = """
-            INSERT OR REPLACE INTO user (
-                mid, face, fans, friend, name, sex, sign, like_num, vip, ip_location
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            # 使用 executemany 进行批量操作，效率更高
-            data_to_insert = [user.to_tuple() for user in users]
-            cursor.executemany(insert_or_replace_sql, data_to_insert)
-            count = cursor.rowcount  # executemany 的 rowcount 是受影响的总行数
-            conn.commit()
-            return count
-        except sqlite3.Error as e:
-            conn.rollback()
-            print(f"批量添加/更新用户失败: {e}")
-            return 0
-        finally:
-            conn.close()
-
-    def delete_users_by_mid(self, mids: List[int]) -> int:
+    def delete_users_by_mids(self, mids: List[int]) -> int:
         """
         根据一个或多个用户ID (mid) 删除用户。
         返回删除的记录数。
@@ -94,7 +65,7 @@ class UserRepository:
         finally:
             conn.close()
 
-    def get_users_by_mid(self, mids: List[int]) -> List[User]:
+    def get_users_by_mids(self, mids: List[int]) -> List[User]:
         """
         根据一个或多个用户ID (mid) 查询用户。
         返回 User 对象的列表。
@@ -116,20 +87,3 @@ class UserRepository:
             conn.close()
         return users
 
-    def get_user_by_mid(self, mid: int) -> Optional[User]:
-        """
-        根据单个用户ID (mid) 查询用户。
-        返回单个 User 对象或 None。
-        """
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        user = None
-        try:
-            cursor.execute("SELECT * FROM user WHERE mid = ?", (mid,))
-            row = cursor.fetchone()
-            user = User.from_db_row(row)
-        except sqlite3.Error as e:
-            print(f"查询单个用户失败: {e}")
-        finally:
-            conn.close()
-        return user

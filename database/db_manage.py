@@ -1,4 +1,8 @@
 import sqlite3
+
+from utils.config import BILI_DB_PATH
+
+
 def init_bilibili_db(db_name):
     conn = None
     try:
@@ -16,8 +20,8 @@ def init_bilibili_db(db_name):
             sex TEXT,                 -- 性别
             sign TEXT,                -- 个性签名
             like_num INTEGER,         -- 获赞数
-            vip INTEGER               -- VIP状态 (0: 非VIP, 1: VIP)
-            ip_location TEXT,         -- IP归属地
+            vip INTEGER,               -- VIP状态 (0: 非VIP, 1: VIP)
+            ip_location TEXT         -- IP归属地
         );
         """
         cursor.execute(create_user_table_sql)
@@ -50,9 +54,8 @@ def init_bilibili_db(db_name):
         create_bv_table_sql = """
         CREATE TABLE IF NOT EXISTS bv (
             oid INTEGER PRIMARY KEY,  -- 视频ID，唯一标识，主键
-            bv TEXT,                  -- BV号
-            title TEXT,               -- 视频标题
-
+            bid TEXT,                  -- BV号
+            title TEXT                -- 视频标题
         );
         """
         cursor.execute(create_bv_table_sql)
@@ -66,3 +69,5 @@ def init_bilibili_db(db_name):
     finally:
         if conn:
             conn.close()
+if __name__ == "__main__":
+    init_bilibili_db(BILI_DB_PATH)

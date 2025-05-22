@@ -62,6 +62,7 @@ class CommentRepository:
                 """
                 cursor.execute(insert_sql, comment.to_tuple())
                 conn.commit()
+                print(f"添加评论成功: {comment.rpid}")
                 return True
         except sqlite3.Error as e:
             conn.rollback()
@@ -70,71 +71,66 @@ class CommentRepository:
         finally:
             conn.close()
 
-    def add_comments_batch(
-        self, comments: List[Comment], overwrite: bool = False
-    ) -> int:
-        """
-        批量添加评论。提高了插入效率。
-        根据 rpid 判断是否是新增或覆盖。
-        返回实际操作（插入或更新）的评论数量。
-        """
+    def add_mini_comment(self, comment: Comment, overwrite: bool = False) -> bool:
         conn = self._get_connection()
         cursor = conn.cursor()
-        count = 0
         try:
-            for comment in comments:
-                cursor.execute("SELECT 1 FROM comment WHERE rpid = ?", (comment.rpid,))
-                exists = cursor.fetchone()
+            # 检查 rpid 是否已存在
+            cursor.execute("SELECT 1 FROM comment WHERE rpid = ?", (comment.rpid,))
+            exists = cursor.fetchone()
 
-                if exists:
-                    if overwrite:
-                        update_sql = """
-                        UPDATE comment SET
-                            parentid = ?, mid = ?, name = ?, level = ?, sex = ?,
-                            information = ?, time = ?, single_reply_num = ?,
-                            single_like_num = ?, sign = ?, ip_location = ?,
-                            vip = ?, face = ?, oid = ?
-                        WHERE rpid = ?
-                        """
-                        params = (
-                            comment.parentid,
-                            comment.mid,
-                            comment.name,
-                            comment.level,
-                            comment.sex,
-                            comment.information,
-                            comment.time,
-                            comment.single_reply_num,
-                            comment.single_like_num,
-                            comment.sign,
-                            comment.ip_location,
-                            comment.vip,
-                            comment.face,
-                            comment.oid,
-                            comment.rpid,
-                        )
-                        cursor.execute(update_sql, params)
-                        count += 1
-                else:
-                    insert_sql = """
-                    INSERT INTO comment (
-                        rpid, parentid, mid, name, level, sex, information,
-                        time, single_reply_num, single_like_num, sign,
-                        ip_location, vip, face, oid
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            if exists:
+                if overwrite:
+                    # 如果存在且允许覆盖，则执行 UPDATE
+                    update_sql = """
+                    UPDATE comment SET
+                        parentid = ?, mid = ?,information = ?, time = ?, oid = ?
+                    WHERE rpid = ?
                     """
-                    cursor.execute(insert_sql, comment.to_tuple())
-                    count += 1
-            conn.commit()
-            return count
+                    # 更新操作，rpid 在 WHERE 子句，所以元组参数顺序要调整
+                    params = (
+                        comment.parentid,
+                        comment.mid,
+                        comment.information,
+                        comment.time,
+                        comment.oid,
+                        comment.rpid,
+                    )
+                    cursor.execute(update_sql, params)
+                    conn.commit()
+                    return True
+                else:
+                    # 如果存在且不允许覆盖，则不操作
+                    return False
+            else:
+                # 如果不存在，则执行 INSERT
+                insert_sql = """
+                INSERT INTO comment (
+                    rpid, parentid, mid, information, time, oid
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """
+
+                params_for_insert = (
+                    comment.rpid,
+                    comment.parentid,
+                    comment.mid,
+                    comment.information,
+                    comment.time,
+                    comment.oid
+                )
+                print(params_for_insert)
+                cursor.execute(insert_sql, params_for_insert)
+                conn.commit()
+                print(f"添加评论成功: {comment.rpid}")
+                return True
         except sqlite3.Error as e:
             conn.rollback()
-            print(f"批量添加/更新评论失败: {e}")
-            return 0
+            print(f"添加/更新评论失败: {e}")
+            return False
         finally:
             conn.close()
 
-    def delete_comments_by_mid(self, mids: List[int]) -> int:
+    def delete_comments_by_mids(self, mids: List[int]) -> int:
         """
         根据一个或多个用户ID (mid) 删除评论。
         返回删除的记录数。
@@ -158,7 +154,7 @@ class CommentRepository:
         finally:
             conn.close()
 
-    def delete_comments_by_oid(self, oids: List[int]) -> int:
+    def delete_comments_by_oids(self, oids: List[int]) -> int:
         """
         根据一个或多个视频ID (oid) 删除评论。
         返回删除的记录数。
@@ -253,10 +249,6 @@ class CommentRepository:
         return comments
 
     def get_comments_by_mid_stream(self, mids: List[int]) -> Iterator[Comment]:
-        """
-        根据一个或多个用户ID (mid) 流式查询评论。
-        返回一个 Comment 对象的迭代器。
-        """
         if not mids:
             return  # 使用 return 结束生成器
 
@@ -311,4 +303,3 @@ class CommentRepository:
         finally:
             if conn:
                 conn.close()
-

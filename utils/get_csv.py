@@ -7,14 +7,6 @@ from entity.comment import Comment
 def export_comments_by_mid_to_csv(
     output_filepath: str, mids: List[int], db_name: str = "./assets/bili_data.db"
 ):
-    """
-    根据给定的用户ID (mid) 列表，查询评论并将其导出到 CSV 文件。
-
-    Args:
-        output_filepath (str): CSV 文件的完整输出路径（含文件名）。
-        mids (List[int]): 用户ID列表。
-        db_name (str): 数据库文件名。
-    """
     if not mids:
         print(
             "Warning: No mids provided for export. CSV file will be empty (header only if created)."
