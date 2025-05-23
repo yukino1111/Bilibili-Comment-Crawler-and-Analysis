@@ -1,6 +1,8 @@
 import sqlite3
 from typing import List, Optional, Tuple, Iterator  # 导入类型提示
 from entity.comment import Comment
+
+
 class CommentRepository:
     def __init__(self, db_name):
         self.db_name = db_name
@@ -21,15 +23,16 @@ class CommentRepository:
                     # 如果存在且允许覆盖，则执行 UPDATE
                     update_sql = """
                     UPDATE comment SET
-                        parentid = ?, mid = ?, name = ?, level = ?, sex = ?,
+                        parentid = ?, rootid = ?, mid = ?, name = ?, level = ?, sex = ?,
                         information = ?, time = ?, single_reply_num = ?,
                         single_like_num = ?, sign = ?, ip_location = ?,
-                        vip = ?, face = ?, oid = ?
+                        vip = ?, face = ?, oid = ?, type = ?
                     WHERE rpid = ?
                     """
                     # 更新操作，rpid 在 WHERE 子句，所以元组参数顺序要调整
                     params = (
                         comment.parentid,
+                        comment.rootid,
                         comment.mid,
                         comment.name,
                         comment.level,
@@ -44,6 +47,7 @@ class CommentRepository:
                         comment.face,
                         comment.oid,
                         comment.rpid,
+                        comment.type,
                     )
                     cursor.execute(update_sql, params)
                     conn.commit()
@@ -55,14 +59,13 @@ class CommentRepository:
                 # 如果不存在，则执行 INSERT
                 insert_sql = """
                 INSERT INTO comment (
-                    rpid, parentid, mid, name, level, sex, information,
+                    rpid, parentid, rootid, mid, name, level, sex, information,
                     time, single_reply_num, single_like_num, sign,
-                    ip_location, vip, face, oid
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ip_location, vip, face, oid, type
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """
                 cursor.execute(insert_sql, comment.to_tuple())
                 conn.commit()
-                print(f"添加评论成功: {comment.rpid}")
                 return True
         except sqlite3.Error as e:
             conn.rollback()
@@ -84,17 +87,19 @@ class CommentRepository:
                     # 如果存在且允许覆盖，则执行 UPDATE
                     update_sql = """
                     UPDATE comment SET
-                        parentid = ?, mid = ?,information = ?, time = ?, oid = ?
+                        parentid = ?, rootid=?, mid = ?,information = ?, time = ?, oid = ?, type = ?
                     WHERE rpid = ?
                     """
                     # 更新操作，rpid 在 WHERE 子句，所以元组参数顺序要调整
                     params = (
                         comment.parentid,
+                        comment.rootid,
                         comment.mid,
                         comment.information,
                         comment.time,
                         comment.oid,
                         comment.rpid,
+                        comment.type,
                     )
                     cursor.execute(update_sql, params)
                     conn.commit()
@@ -106,22 +111,22 @@ class CommentRepository:
                 # 如果不存在，则执行 INSERT
                 insert_sql = """
                 INSERT INTO comment (
-                    rpid, parentid, mid, information, time, oid
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                    rpid, parentid, rootid, mid, information, time, oid, type
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """
 
                 params_for_insert = (
                     comment.rpid,
                     comment.parentid,
+                    comment.rootid,
                     comment.mid,
                     comment.information,
                     comment.time,
-                    comment.oid
+                    comment.oid,
+                    comment.type,
                 )
-                print(params_for_insert)
                 cursor.execute(insert_sql, params_for_insert)
                 conn.commit()
-                print(f"添加评论成功: {comment.rpid}")
                 return True
         except sqlite3.Error as e:
             conn.rollback()
@@ -289,6 +294,7 @@ class CommentRepository:
             query_sql = f"""
             SELECT * FROM comment
             WHERE oid IN ({placeholders})
+            AND type = 1
             ORDER BY time ASC -- 流式通常按时间升序处理
             """
             cursor.execute(query_sql, tuple(oids))

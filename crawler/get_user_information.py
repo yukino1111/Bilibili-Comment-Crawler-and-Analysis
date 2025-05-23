@@ -59,9 +59,10 @@ class BilibiliUserCrawler:
                 like_num=like_num,  # 获赞数
                 vip=1 if card_data.get("vip", {}).get("vipStatus") == 1 else 0,
             )
+            print(f"成功获得用户信息: {user_obj.name} (mid: {user_obj.mid})")
             self.user_repo.add_or_update_user(user_obj)
             self.crawled_count += 1
-            print(f"成功爬取并存储用户: {user_obj.name} (mid: {user_obj.mid})")
+
             return user_obj
         except Exception as e:
             print(f"处理或存储用户 {mid} 数据失败: {e}")
@@ -87,6 +88,3 @@ class BilibiliUserCrawler:
 
         print(f"批量爬取完成。总计成功爬取 {successful_crawls} 个用户。")
         return successful_crawls
-
-
-

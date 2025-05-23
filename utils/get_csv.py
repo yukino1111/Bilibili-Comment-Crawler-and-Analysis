@@ -28,7 +28,6 @@ def export_comments_by_mid_to_csv(
             # 写入 CSV 表头
             header = [
                 "序号",
-                "上级评论ID",
                 "评论ID",
                 "用户ID",
                 "用户名",
@@ -64,7 +63,6 @@ def export_comments_by_mid_to_csv(
                 # 根据你的字段顺序构建行数据
                 row_data = [
                     row_number,
-                    comment.parentid,
                     comment.rpid,
                     comment.mid,
                     comment.name,
@@ -111,7 +109,6 @@ def export_comments_by_oid_to_csv(
             # 写入 CSV 表头 (与按 mid 导出相同)
             header = [
                 "序号",
-                "上级评论ID",
                 "评论ID",
                 "用户ID",
                 "用户名",
@@ -144,9 +141,8 @@ def export_comments_by_oid_to_csv(
 
                 row_data = [
                     row_number,
-                    comment.parentid,
-                    comment.rpid,  # 评论ID
-                    comment.mid,  # 用户ID
+                    comment.rpid,
+                    comment.mid,
                     comment.name,
                     comment.level,
                     comment.sex,
@@ -165,40 +161,3 @@ def export_comments_by_oid_to_csv(
         )
     except Exception as e:
         print(f"导出评论到 CSV 失败: {e}")
-
-
-# --- 测试部分 ---
-if __name__ == "__main__":
-    # 为了测试，我们需要一个数据库文件和一些数据。
-    # 假设你已经运行了 CommentRepository 的测试部分，并且 'test_comments.db' 已经有一些数据。
-    # 如果没有，请先运行 CommentRepository.py 中的 __main__ 部分。
-
-    # 确保有数据库文件（如果不存在，mock CommentRepository 也能工作）
-    _db_file = "./assets/bili_data.db"  # 假设使用原始数据库文件名
-
-    # 确保输出目录存在
-    if not os.path.exists("output_csv"):
-        os.makedirs("output_csv")
-
-    # # 测试导出 by mid
-    # print("\n--- 导出评论 (按 mid) ---")
-    # export_comments_by_mid_to_csv(
-    #     output_filepath="./output_csv/comments_by_mid_101_102.csv",
-    #     mids=[101, 102],
-    #     db_name=_db_file,
-    # )
-
-    # 测试导出 by oid
-    print("\n--- 导出评论 (按 oid) ---")
-    export_comments_by_oid_to_csv(
-        output_filepath="./output_csv/comments_by_oid_10001.csv",
-        oids=[114544999399889],
-        db_name=_db_file,
-    )
-
-    # print("\n--- 导出评论 (按多个 oid) ---")
-    # export_comments_by_oid_to_csv(
-    #     output_filepath="./output_csv/comments_by_oid_10001_10002.csv",
-    #     oids=[10001, 10002],
-    #     db_name=_db_file,
-    # )

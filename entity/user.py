@@ -11,7 +11,6 @@ class User:
         sign: str = None,
         like_num: int = None,
         vip: int = None,
-        ip_location: str = None,
     ):
         self.mid = mid
         self.face = face
@@ -22,7 +21,6 @@ class User:
         self.sign = sign
         self.like_num = like_num
         self.vip = vip
-        self.ip_location = ip_location
 
     def to_tuple(self):
         return (
@@ -35,7 +33,6 @@ class User:
             self.sign,
             self.like_num,
             self.vip,
-            self.ip_location,
         )
 
     @classmethod
@@ -52,5 +49,4 @@ class User:
             sign=row[6],
             like_num=row[7],
             vip=row[8],
-            ip_location=row[9],
         )

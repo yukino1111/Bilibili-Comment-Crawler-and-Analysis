@@ -16,12 +16,6 @@ class UserRepository:
         return sqlite3.connect(self.db_name)
 
     def add_or_update_user(self, user: User) -> bool:
-        """
-        向数据库中添加或更新一个用户。
-        如果 mid 已存在，则更新该用户的所有可变信息。
-        如果 mid 不存在，则插入新用户。
-        返回 True 表示操作成功，False 表示失败。
-        """
         conn = self._get_connection()
         cursor = conn.cursor()
         try:
@@ -29,10 +23,22 @@ class UserRepository:
             # 它会尝试插入新行，如果主键冲突，则替换掉现有行
             insert_or_replace_sql = """
             INSERT OR REPLACE INTO user (
-                mid, face, fans, friend, name, sex, sign, like_num, vip, ip_location
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                mid, face, fans, friend, name, sex, sign, like_num, vip
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
-            cursor.execute(insert_or_replace_sql, user.to_tuple())
+            params = (
+                user.mid,
+                user.face,
+                user.fans,
+                user.friend,
+                user.name,
+                user.sex,
+                user.sign,
+                user.like_num,
+                user.vip,
+            )
+            cursor.execute(insert_or_replace_sql, params)
+
             conn.commit()
             return True
         except sqlite3.Error as e:
@@ -86,4 +92,3 @@ class UserRepository:
         finally:
             conn.close()
         return users
-

@@ -99,19 +99,13 @@ class BilibiliCommentCrawler:
     def _parse_and_save_comment(
         self, raw_comment_data: dict, is_secondary: bool = False, parent_rpid: int = 0
     ):
-        """
-        解析单条评论数据并将其保存到数据库。
-        :param raw_comment_data: 原始的评论JSON数据字典
-        :param is_secondary: 是否是二级评论
-        :param parent_rpid: 如果是二级评论，其一级评论的rpid
-        """
         # 提取用户数据
         member_info = raw_comment_data["member"]
         user_mid = member_info["mid"]
         user_name = member_info["uname"]
         user_sex = member_info["sex"]
         user_face = member_info["avatar"]
-        user_sign = member_info.get("sign", "")  # 签名可能不存在
+        user_sign = member_info.get("sign", None)  # 签名可能不存在
         user_fans = None  # API返回的member_info里通常没有fans, friend, like_num，这里留空或设置默认
         user_friend = None
         user_like_num = None
@@ -135,6 +129,9 @@ class BilibiliCommentCrawler:
         rpid = raw_comment_data["rpid"]
         comment_parentid = (
             parent_rpid if is_secondary else raw_comment_data.get("parent", 0)
+        )
+        comment_rootid = (
+            parent_rpid if is_secondary else raw_comment_data.get("root", 0)
         )  # 如果是一级评论，parentid通常是0
         # 如果是二级评论，parentid就是一级评论的rpid
         # 如果是一级评论，API返回的parent可能为0或其自身rpid，这里统一逻辑让它指向父评论ID
@@ -158,11 +155,12 @@ class BilibiliCommentCrawler:
         # 如果IP是 "所在地："开头，则截取
         if ip_location.startswith("IP属地："):
             ip_location = ip_location[5:]
-
+        type = int(raw_comment_data["type"])
         # 创建 Comment 实体
         comment_obj = Comment(
             rpid=rpid,
             parentid=comment_parentid,
+            rootid=comment_rootid,
             mid=user_mid,
             name=user_name,
             level=comment_level,
@@ -176,6 +174,7 @@ class BilibiliCommentCrawler:
             vip=user_vip_status,
             face=user_face,
             oid=int(self.oid),  # oid是视频唯一ID
+            type=type
         )
         # 将评论数据存入数据库，rpid存在则更新，不存在则插入
         self.comment_repo.add_comment(
@@ -184,10 +183,6 @@ class BilibiliCommentCrawler:
 
     # 轮页爬取
     def start(self) -> bool:
-        """
-        爬取当前页评论，并将数据保存到数据库。
-        返回 True 表示还有下一页，False 表示爬取结束。
-        """
         mode = 2
         plat = 1
         type = 1

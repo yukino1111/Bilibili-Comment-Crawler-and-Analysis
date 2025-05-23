@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
+import warnings
+warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import seaborn as sns
@@ -363,7 +365,6 @@ class CommentAnalyzer:
         if self.df is None or self.df.empty:
             print("评论数据为空，无法进行情感分析。")
             return
-        print("开始进行情感分析...")
         if "sentiment_score" not in self.df.columns:
             self.df["sentiment_score"] = self.df["评论内容"].apply(
                 lambda x: SnowNLP(str(x)).sentiments if pd.notnull(x) else None
@@ -383,7 +384,6 @@ class CommentAnalyzer:
             self.df["sentiment_label"] = self.df["sentiment_score"].apply(
                 classify_sentiment
             )
-        print("情感分析完成。")
         sentiment_counts = self.df["sentiment_label"].value_counts()
         if not sentiment_counts.empty:
             self.plot_figure(
@@ -406,7 +406,7 @@ class CommentAnalyzer:
         else:
             print("没有足够的有效情感分析结果来生成分布图。")
         average_sentiment_score = self.df["sentiment_score"].dropna().mean()
-        print(f"评论的平均情感分数 (0-1, 1为最积极): {average_sentiment_score:.4f}")
+        # print(f"评论的平均情感分数 (0-1, 1为最积极): {average_sentiment_score:.4f}")
 
     def generate_wordcloud(self):
         if self.df is None:
@@ -554,8 +554,8 @@ class CommentAnalyzer:
         avg_like_num = self.df["点赞数"].mean()
         avg_vip = (self.df["是否是大会员"] == "是").astype(int).mean()
 
-        print(f"所有评论的平均特征:")
-        print(f"  等级: {avg_level:.2f}, 回复数: {avg_reply_num:.2f}, 点赞数: {avg_like_num:.2f}, 大会员: {avg_vip:.2f}")
+        # print(f"所有评论的平均特征:")
+        # print(f"  等级: {avg_level:.2f}, 回复数: {avg_reply_num:.2f}, 点赞数: {avg_like_num:.2f}, 大会员: {avg_vip:.2f}")
 
         # 2. 找出点赞数Top5的评论，并计算其平均特征
         if self.df.empty:
@@ -577,8 +577,8 @@ class CommentAnalyzer:
         top5_avg_like_num = top5_comments["点赞数"].mean()
         top5_avg_vip = (top5_comments["是否是大会员"] == "是").astype(int).mean()
 
-        print(f"\n赞数Top5评论的平均特征:")
-        print(f"  等级: {top5_avg_level:.2f}, 回复数: {top5_avg_reply_num:.2f}, 点赞数: {top5_avg_like_num:.2f}, 大会员: {top5_avg_vip:.2f}")
+        # print(f"\n赞数Top5评论的平均特征:")
+        # print(f"  等级: {top5_avg_level:.2f}, 回复数: {top5_avg_reply_num:.2f}, 点赞数: {top5_avg_like_num:.2f}, 大会员: {top5_avg_vip:.2f}")
 
         # 3. 数据归一化
         categories = ["用户等级", "回复数", "点赞数", "是否是大会员"]
@@ -595,11 +595,11 @@ class CommentAnalyzer:
         max_like_num_for_norm = max(avg_like_num, top5_avg_like_num)
         if max_like_num_for_norm == 0: max_like_num_for_norm = 1
 
-        print("\n--- 各维度归一化范围 ---")
-        print(f"用户等级归一化最大值: {max_level}")
-        print(f"回复数归一化最大值 (取两组中最大): {max_reply_num_for_norm}")
-        print(f"点赞数归一化最大值 (取两组中最大): {max_like_num_for_norm}")
-        print(f"大会员归一化最大值: {max_vip}")
+        # print("\n--- 各维度归一化范围 ---")
+        # print(f"用户等级归一化最大值: {max_level}")
+        # print(f"回复数归一化最大值 (取两组中最大): {max_reply_num_for_norm}")
+        # print(f"点赞数归一化最大值 (取两组中最大): {max_like_num_for_norm}")
+        # print(f"大会员归一化最大值: {max_vip}")
 
         # 归一化赞数Top5评论的平均值
         normalized_top5_avg_values = [
@@ -621,9 +621,9 @@ class CommentAnalyzer:
         normalized_top5_avg_values = [min(1.0, max(0.0, v)) for v in normalized_top5_avg_values]
         normalized_avg_values = [min(1.0, max(0.0, v)) for v in normalized_avg_values]
 
-        print("\n--- 归一化后的数据 ---")
-        print(f"赞数Top5评论平均归一化值: {normalized_top5_avg_values}")
-        print(f"所有评论平均归一化值: {normalized_avg_values}")
+        # print("\n--- 归一化后的数据 ---")
+        # print(f"赞数Top5评论平均归一化值: {normalized_top5_avg_values}")
+        # print(f"所有评论平均归一化值: {normalized_avg_values}")
 
         # 4. 绘制雷达图
         plot_data = {

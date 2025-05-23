@@ -20,8 +20,7 @@ def init_bilibili_db(db_name):
             sex TEXT,                 -- 性别
             sign TEXT,                -- 个性签名
             like_num INTEGER,         -- 获赞数
-            vip INTEGER,               -- VIP状态 (0: 非VIP, 1: VIP)
-            ip_location TEXT         -- IP归属地
+            vip INTEGER               -- VIP状态 (0: 非VIP, 1: VIP)
         );
         """
         cursor.execute(create_user_table_sql)
@@ -31,7 +30,8 @@ def init_bilibili_db(db_name):
         create_comment_table_sql = """
         CREATE TABLE IF NOT EXISTS comment (
             rpid INTEGER PRIMARY KEY,           -- 评论ID，唯一标识，主键
-            parentid INTEGER,                   -- 父评论ID (如果是一级评论，则为0或其自身rpid；如果是回复，则为被回复的评论rpid)
+            parentid INTEGER,                   -- 父评论ID
+            rootid INTEGER,                     -- root评论ID
             mid INTEGER,                        -- 发布评论的用户ID
             name TEXT,                          -- 发布评论的用户昵称
             level INTEGER,                      -- 用户等级
@@ -44,7 +44,8 @@ def init_bilibili_db(db_name):
             ip_location TEXT,                   -- IP归属地
             vip INTEGER,                        -- 评论者VIP状态 (0: 非VIP, 1: VIP)
             face TEXT,                          -- 评论者头像URL (可能与user表重复，但为了评论快照完整性保留)
-            oid INTEGER                         -- 视频或内容的ID (AV号或BV号对应的整数ID)
+            oid INTEGER,                        -- 视频或内容的ID (AV号或BV号对应的整数ID)
+            type INTEGER            
         );
         """
         cursor.execute(create_comment_table_sql)
