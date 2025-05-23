@@ -6,6 +6,7 @@ from entity.comment import Comment
 from repository.comment_repository import CommentRepository
 from utils.config import *
 
+
 class BilibiliUserCommentsCrawler:
 
     def __init__(self, db_name: str = BILI_DB_PATH):
@@ -13,7 +14,7 @@ class BilibiliUserCommentsCrawler:
         self.base_url = "https://api.aicu.cc/api/v3/search/getreply"
         self.comment_repo = CommentRepository(db_name)
         self.crawled_comment_count = 0
-        self.page_size = 100  # 每页评论数量
+        self.page_size = 500  # 每页评论数量
 
     def _get_comments_page_from_api(
         self, uid: str, pn: int
@@ -60,7 +61,7 @@ class BilibiliUserCommentsCrawler:
             # dyn 字段包含 oid 和 type
             dyn_data = raw_comment_data.get("dyn", {})
             oid = int(dyn_data.get("oid", 0))  # 视频或内容的ID
-            type= int(dyn_data.get("type", 0))  # 评论类型
+            type = int(dyn_data.get("type", 0))  # 评论类型
 
             comment_obj = Comment(
                 rpid=rpid,
