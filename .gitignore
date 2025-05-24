@@ -6,3 +6,4 @@ __pycache__/
 bili_cookie.txt
 *.png
 ./assets/chrome_user_data/
+bili_data.db
